@@ -1,0 +1,81 @@
+{% for client in page_obj %}
+<tr class="align-middle action-row">
+    <td class="ps-4 py-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center bg-light fw-bold shadow-sm" style="width: 42px; height: 42px; color: var(--primary-color); border: 2px solid color-mix(in srgb, var(--primary-color) 20%, transparent);">
+                {{ client.name|make_list|first|upper }}
+            </div>
+            <div>
+                <a href="{% url 'client_update' client.pk %}" class="fw-bold text-dark text-decoration-none mb-0 d-block">{{ client.name }}</a>
+                <div class="text-muted" style="font-size: 0.70rem;">Added: {{ client.created_at|date:"M d, Y" }}</div>
+            </div>
+        </div>
+    </td>
+    <td>
+        <div class="text-dark small fw-semibold">{{ client.company_name|default:"<span class='text-muted fw-normal'>Individual</span>"|safe }}</div>
+        
+        <div class="text-muted mt-1 d-flex align-items-center copy-container" style="font-size: 0.75rem;">
+            <i class="bi bi-upc-scan me-1"></i>VAT: 
+            <span class="ms-1">{{ client.tax_number|default:"N/A" }}</span>
+            {% if client.tax_number %}
+            <i class="bi bi-clipboard ms-2 copy-btn" onclick="copySecureText(event, '{{ client.tax_number }}', this)" title="Copy VAT Number"></i>
+            {% endif %}
+        </div>
+    </td>
+    <td>
+        <div class="text-muted small mb-2 d-flex align-items-center copy-container">
+            {% if client.email %}
+            <a href="mailto:{{ client.email }}" class="text-danger contact-icon me-2" title="Send Email"><i class="bi bi-envelope-arrow-up-fill"></i></a>
+            {% else %}
+            <i class="bi bi-envelope text-secondary me-2"></i>
+            {% endif %}
+            
+            <span class="copy-text">{{ client.email|default:"-" }}</span>
+            
+            {% if client.email %}
+            <i class="bi bi-clipboard ms-2 copy-btn" onclick="copySecureText(event, '{{ client.email }}', this)" title="Copy Email"></i>
+            {% endif %}
+        </div>
+
+        <div class="text-muted small d-flex align-items-center copy-container">
+            {% if client.phone %}
+            <a href="https://wa.me/{{ client.phone|urlencode }}" target="_blank" class="text-success contact-icon me-1" title="Message on WhatsApp"><i class="bi bi-whatsapp"></i></a>
+            <a href="tel:{{ client.phone }}" class="text-primary contact-icon me-2" title="Direct Call"><i class="bi bi-telephone-outbound-fill"></i></a>
+            {% else %}
+            <i class="bi bi-telephone text-secondary me-2"></i>
+            {% endif %}
+            
+            <span class="copy-text">{{ client.phone|default:"-" }}</span>
+            
+            {% if client.phone %}
+            <i class="bi bi-clipboard ms-2 copy-btn" onclick="copySecureText(event, '{{ client.phone }}', this)" title="Copy Phone"></i>
+            {% endif %}
+        </div>
+    </td>
+    <td class="text-end pe-4">
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm rounded-circle border shadow-sm dropdown-toggle-icon-none" type="button" data-bs-toggle="dropdown" style="width: 32px; height: 32px;">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-1">
+                <li><a class="dropdown-item py-2 small fw-medium" href="{% url 'client_update' client.pk %}"><i class="bi bi-pencil-square text-primary me-2"></i> Edit Client</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form method="POST" action="{% url 'client_delete' client.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item py-2 small fw-medium text-danger" onclick="return confirm('Delete this client permanently?');"><i class="bi bi-trash3 me-2"></i> Delete Client</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="text-center py-5">
+        <i class="bi bi-search fs-1 text-muted opacity-25 d-block mb-3"></i>
+        <h5 class="fw-bold text-dark">No clients found</h5>
+        <p class="text-muted small">Try adjusting your filters.</p>
+    </td>
+</tr>
+{% endfor %}

@@ -3,15 +3,12 @@
 {% block title %}Clients | {{ current_workspace.company_name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-0 mt-1 py-0">
+<div class="container-fluid px-0 mt-1 py-0 w-100">
     
-    <!-- ========================================== -->
-    <!-- 1. HEADER, BREADCRUMBS & TUTORIAL BUTTON   -->
-    <!-- ========================================== -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 w-100">
+        
         <div class="d-flex flex-column">
-            <h1 class="h3 fw-semibold mb-1 text-dark">Clients</h1>
-            <!-- Added consistent Breadcrumbs -->
+            <h1 class="h3 fw-semibold mb-1 text-dark">Client Directory</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb breadcrumb-custom mb-0 small">
                     <li class="breadcrumb-item"><a href="/saas/dashboard/" class="text-decoration-none text-muted">Home</a></li>
@@ -21,91 +18,125 @@
             </nav>
         </div>
 
-        <div class="mt-3 mt-sm-0 d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             {% if tutorial %}
-            <button type="button" class="btn fw-semibold shadow-sm rounded-pill px-4 d-flex align-items-center help-pulse-btn" data-bs-toggle="modal" data-bs-target="#tutorialModal" style="background-color: color-mix(in srgb, var(--primary-color) 10%, white); color: var(--primary-color); border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);">
-                <i class="bi bi-play-circle-fill me-2 fs-5"></i> Need Help?
+            <button type="button" class="btn fw-semibold shadow-sm rounded-pill px-3 d-flex align-items-center help-pulse-btn" data-bs-toggle="modal" data-bs-target="#tutorialModal" style="background-color: color-mix(in srgb, var(--primary-color) 10%, white); color: var(--primary-color); border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);">
+                <i class="bi bi-play-circle-fill me-1 fs-6"></i> Help
             </button>
             {% endif %}
-            <a href="{% url 'client_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold" style="background-color: var(--primary-color); border-color: var(--primary-color);">
-                <i class="bi bi-plus-lg me-1"></i> Add New Client
+
+            <div class="dropdown">
+                <button class="btn btn-light bg-white border shadow-sm text-secondary rounded-pill px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-cloud-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu shadow-sm border-0 rounded-3 mt-1">
+                    <li><a class="dropdown-item py-2 small fw-medium" href="#" onclick="triggerExport('excel')"><i class="bi bi-file-earmark-excel text-success me-2 fs-6"></i> Export as Excel</a></li>
+                    <li><a class="dropdown-item py-2 small fw-medium" href="#" onclick="triggerExport('pdf')"><i class="bi bi-file-earmark-pdf text-danger me-2 fs-6"></i> Export as PDF</a></li>
+                </ul>
+            </div>
+
+            <button class="btn btn-light bg-white border shadow-sm text-secondary rounded-pill px-3">
+                <i class="bi bi-cloud-upload me-1"></i> Import
+            </button>
+
+            <a href="{% url 'client_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold ms-1" style="background-color: var(--primary-color); border-color: var(--primary-color);">
+                <i class="bi bi-plus-lg me-1"></i> Add Client
             </a>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 2. DATA TABLE & TOOLBAR                    -->
-    <!-- ========================================== -->
-    <div class="premium-card bg-white rounded-4 shadow-sm border overflow-hidden">
-        
-        <!-- Toolbar -->
-        <div class="p-3 border-bottom bg-light bg-opacity-50 d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div class="position-relative flex-grow-1" style="max-width: 400px;">
-                <i class="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
-                <input type="text" id="clientSearch" class="form-control rounded-pill ps-5 bg-white border shadow-sm" placeholder="Search by name, company, email...">
+    <div class="premium-card bg-white p-3 p-md-4 mb-4 rounded-4 shadow-sm border w-100 d-block">
+        <form id="inlineFilterForm" class="row g-3 align-items-end m-0">
+            
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label small fw-bold text-muted mb-1 text-uppercase" style="font-size: 0.70rem; letter-spacing: 0.5px;">Client Name</label>
+                <select name="q" class="searchable-select" placeholder="Select or type name...">
+                    <option value="">All Clients</option>
+                    {% for name in filter_names %}
+                    <option value="{{ name }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-        </div>
 
-        <!-- Data Table -->
-        <div class="table-responsive" style="min-height: 400px;">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-secondary text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label small fw-bold text-muted mb-1 text-uppercase" style="font-size: 0.70rem; letter-spacing: 0.5px;">Tax / VAT Number</label>
+                <select name="vat" class="searchable-select" placeholder="Select or type VAT...">
+                    <option value="">All VAT Numbers</option>
+                    {% for vat in filter_vats %}
+                    <option value="{{ vat }}">{{ vat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label small fw-bold text-muted mb-1 text-uppercase" style="font-size: 0.70rem; letter-spacing: 0.5px;">Email Address</label>
+                <select name="email" class="searchable-select" placeholder="Select or type Email...">
+                    <option value="">All Emails</option>
+                    {% for email in filter_emails %}
+                    <option value="{{ email }}">{{ email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-12 col-lg-3 d-flex gap-2 mt-3 mt-lg-0">
+                <button type="button" class="btn fw-bold text-white flex-grow-1 shadow-sm rounded-3 py-2" style="background-color: var(--primary-color);" onclick="applyFilters()">
+                    <i class="bi bi-funnel-fill me-1"></i> Filter
+                </button>
+                <button type="button" class="btn btn-light border rounded-3 px-3 shadow-sm py-2" onclick="resetFilters()" title="Reset Filters">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="premium-card w-100 d-block bg-white rounded-4 shadow-sm border overflow-hidden">
+        <div class="table-responsive w-100" style="min-height: 400px;">
+            <table class="table table-hover align-middle mb-0 w-100">
+                <thead class="bg-light text-secondary text-uppercase border-bottom" style="font-size: 0.75rem; letter-spacing: 0.5px;">
                     <tr>
-                        <th class="ps-4 border-0 py-3">Client</th>
-                        <th class="border-0 py-3">Company Details</th>
-                        <th class="border-0 py-3">Contact</th>
-                        <th class="border-0 py-3">Total Invoices</th>
-                        <th class="text-end pe-4 border-0 py-3">Actions</th>
+                        <th class="ps-4 border-0 py-3" style="width: 25%;">Client Profile</th>
+                        <th class="border-0 py-3" style="width: 25%;">Company & Tax Details</th>
+                        <th class="border-0 py-3" style="width: 30%;">Quick Contact</th>
+                        <th class="text-end pe-4 border-0 py-3" style="width: 20%;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="clientTableBody">
-                    {% for client in clients %}
-                    <tr>
-                        <td class="ps-4 py-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-primary fw-bold" style="width: 40px; height: 40px; border: 2px solid var(--primary-color);">
-                                    {{ client.name|make_list|first|upper }}
-                                </div>
-                                <div class="fw-bold text-dark">{{ client.name }}</div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="text-dark small fw-medium">{{ client.company_name|default:"-" }}</div>
-                            <div class="text-muted small">VAT: {{ client.tax_number|default:"-" }}</div>
-                        </td>
-                        <td>
-                            <div class="text-muted small"><i class="bi bi-envelope me-1"></i> {{ client.email|default:"-" }}</div>
-                            <div class="text-muted small"><i class="bi bi-telephone me-1"></i> {{ client.phone|default:"-" }}</div>
-                        </td>
-                        <td>
-                            <span class="badge bg-light text-secondary border rounded-pill px-3">{{ client.invoices.count }} Invoices</span>
-                        </td>
-                        <td class="text-end pe-4">
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-circle border shadow-sm" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                                    <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-pencil-square text-primary me-2"></i> Edit</a></li>
-                                    <li><a class="dropdown-item py-2 small text-danger" href="#"><i class="bi bi-trash3 me-2"></i> Delete</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
-                            <i class="bi bi-people fs-1 opacity-25 d-block mb-2"></i> No clients found.
-                        </td>
-                    </tr>
-                    {% endfor %}
+                <tbody id="tableBodyContent">
+                    {% include 'finance/partials/client_table_body.html' %}
                 </tbody>
             </table>
+        </div>
+
+        <div class="p-3 border-top bg-light bg-opacity-50 d-flex justify-content-between align-items-center w-100">
+            <span class="small text-muted fw-medium">
+                Showing {{ page_obj.start_index|default:0 }} to {{ page_obj.end_index|default:0 }} of {{ total_clients }} clients
+            </span>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0 shadow-sm">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link text-secondary fw-medium" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Prev</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><a class="page-link text-muted" href="#">Prev</a></li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><a class="page-link fw-bold border-0" style="background-color: var(--primary-color);" href="#">{{ num }}</a></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link text-secondary" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link text-secondary fw-medium" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><a class="page-link text-muted" href="#">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- 3. TUTORIAL MODAL (Same as Add Client)     -->
-<!-- ========================================== -->
 {% if tutorial %}
 <div class="modal fade" id="tutorialModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -128,4 +159,85 @@
     </div>
 </div>
 {% endif %}
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+<style>
+    /* Select Dropdown Styling */
+    .ts-control { border-radius: 8px !important; border-color: #dee2e6 !important; padding: 0.5rem 0.75rem !important; box-shadow: 0 .125rem .25rem rgba(0,0,0,.02) !important; }
+    .ts-control.focus { border-color: var(--primary-color) !important; box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--primary-color) 25%, transparent) !important; }
+    
+    /* Copy & Hover Effects */
+    .copy-btn { opacity: 0; cursor: pointer !important; transition: all 0.2s; font-size: 1.1rem; }
+    .copy-container:hover .copy-btn { opacity: 1; color: var(--primary-color) !important; }
+    .copy-btn:active { transform: scale(0.9); }
+    .action-row:hover { background-color: #f8fafc; }
+    .contact-icon { font-size: 1.1rem; transition: transform 0.2s; cursor: pointer; }
+    .contact-icon:hover { transform: translateY(-2px); }
+</style>
+
+<script>
+    let selectInstances = [];
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize Searchable Dropdowns
+        document.querySelectorAll('.searchable-select').forEach((el) => {
+            selectInstances.push(new TomSelect(el, {
+                create: false,
+                sortField: { field: "text", direction: "asc" }
+            }));
+        });
+    });
+
+    let currentFilterState = '';
+
+    function applyFilters() {
+        const formData = new FormData(document.getElementById('inlineFilterForm'));
+        const queryParams = new URLSearchParams(formData);
+        
+        currentFilterState = queryParams.toString();
+        
+        document.getElementById('tableBodyContent').innerHTML = `<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-primary spinner-border-sm" role="status"></div><div class="mt-2 text-muted small fw-medium">Applying Filters...</div></td></tr>`;
+        
+        const url = `{% url 'client_list' %}?${currentFilterState}`;
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('tableBodyContent').innerHTML = html;
+            window.history.pushState({}, '', url);
+        });
+    }
+
+    function resetFilters() {
+        selectInstances.forEach(instance => instance.clear());
+        applyFilters();
+    }
+
+    function triggerExport(type) {
+        window.location.href = `?export=${type}&${currentFilterState}`;
+    }
+
+    // Secure Copy (Works on HTTP & HTTPS)
+    function copySecureText(event, text, element) {
+        event.preventDefault(); 
+        event.stopPropagation();
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed"; 
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            element.classList.remove('bi-clipboard');
+            element.classList.add('bi-check2-circle', 'text-success');
+            setTimeout(() => {
+                element.classList.remove('bi-check2-circle', 'text-success');
+                element.classList.add('bi-clipboard');
+            }, 1500);
+        } catch (err) { }
+        document.body.removeChild(textArea);
+    }
+</script>
 {% endblock %}
