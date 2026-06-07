@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | {{ current_workspace.company_name }}{% endblock %}
+
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { background-color: #f8fafc; }
+        
+        .stat-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            background: #ffffff;
+            transition: all 0.2s ease-in-out;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .chart-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}   
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-dark mb-0">Workspace Overview</h3>
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-semibold">
+            <i class="bi bi-star-fill text-warning me-1"></i> {{ current_workspace.subscription.plan.name|default:"Starter Plan" }}
+        </span>
+    </div>
+
+    <!-- Top Stats Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary text-uppercase small fw-semibold">Active Modules</span>
+                        <h3 class="mt-2 fw-bold mb-0 text-dark">{{ dynamic_menu|length|add:"-2" }}</h3>
+                        <small class="text-success fw-medium"><i class="bi bi-check-circle"></i> Installed Apps</small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(13, 110, 253, 0.1); color: var(--primary-color);">
+                        <i class="bi bi-grid-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary text-uppercase small fw-semibold">Total Staff</span>
+                        <h3 class="mt-2 fw-bold mb-0 text-dark">1 / 5</h3>
+                        <small class="text-info fw-medium"><i class="bi bi-people"></i> Team members</small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(13, 202, 240, 0.1); color:#0dcaf0;">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary text-uppercase small fw-semibold">Storage Used</span>
+                        <h3 class="mt-2 fw-bold mb-0 text-dark">0.05 GB</h3>
+                        <small class="text-success fw-medium"><i class="bi bi-cloud-check"></i> Out of 1 GB</small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(25,135,84,0.1); color:#198754;">
+                        <i class="bi bi-database"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary text-uppercase small fw-semibold">Subscription</span>
+                        <h3 class="mt-2 fw-bold mb-0 text-dark">Active</h3>
+                        <small class="text-warning fw-medium"><i class="bi bi-clock"></i> Renews in 14 Days</small>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color:#f59e0b;">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Actions & App Store Banner -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="chart-box p-5 h-100" style="background: linear-gradient(135deg, var(--primary-color) 0%, #0f172a 100%); color: white;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold mb-2">Supercharge your Workspace 🚀</h4>
+                        <p class="mb-0 opacity-75">Head over to the App Store to install CRM, Invoicing, HR, and Website Builders.</p>
+                    </div>
+                    <a href="/app-store/" class="btn btn-light fw-bold px-4 py-2 rounded-pill" style="color: var(--primary-color);">
+                        <i class="bi bi-shop me-2"></i> Go to App Store
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

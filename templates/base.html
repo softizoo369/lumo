@@ -1,0 +1,236 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %}{{ current_workspace.company_name|default:"ScaleX ERP" }}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Dynamic Primary Color from Workspace Settings */
+        :root {
+            --primary-color: {{ primary_color|default:"#8d00ce" }};
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <nav class="navbar top-navbar sticky-top px-3 px-md-4 py-2 mb-3">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light btn-icon d-md-none border-0 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <a class="navbar-brand fw-bold fs-4 d-flex align-items-center gap-2" href="#" style="color: #0a2b44;">
+                    {% if workspace_logo %}
+                        <img src="{{ workspace_logo }}" alt="Company Logo" style="height: 36px; object-fit: contain;">
+                    {% else %}
+                        <i class="bi bi-layers-fill" style="color: var(--primary-color);"></i>
+                    {% endif %}
+                    {{ current_workspace.company_name|default:"ScaleX ERP" }}
+                </a>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                
+                <form class="d-none d-md-block me-2" role="search">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="search" class="form-control border-start-0 ps-0" placeholder="Search invoices, clients..." style="background: transparent; outline: none; box-shadow: none;">
+                    </div>
+                </form>
+                
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false" style="position: relative;">
+                        <i class="bi bi-bell fs-4 text-secondary"></i>
+                        {% if unread_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                {{ unread_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-0 rounded-3" style="width: 320px; overflow: hidden;">
+                        <li class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">Notifications</h6>
+                            {% if unread_count > 0 %}
+                                <span class="badge bg-primary rounded-pill">{{ unread_count }} New</span>
+                            {% endif %}
+                        </li>
+                        
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            {% for notif in unread_notifications %}
+                            <li>
+                                <a class="dropdown-item p-3 border-bottom text-wrap" href="{% url 'read_notification' notif.id %}">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-exclamation-circle-fill text-danger fs-5 me-2 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-dark fs-6">{{ notif.title }}</h6>
+                                            <p class="mb-1 text-muted" style="font-size: 0.8rem;">{{ notif.message }}</p>
+                                            <small class="text-secondary" style="font-size: 0.7rem;">{{ notif.created_at|timesince }} ago</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li class="p-4 text-center text-muted">
+                                <i class="bi bi-bell-slash fs-3 d-block mb-2 text-light"></i>
+                                <span style="font-size: 0.9rem;">No new notifications</span>
+                            </li>
+                            {% endfor %}
+                        </div>
+                        
+                        <li class="p-2 text-center bg-light border-top">
+                            <a href="#" class="text-decoration-none fw-semibold small text-primary">View All History</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Verified Profile Dropdown -->
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 0; border: none;">
+                        <div class="user-avatar-ring">
+                            <div class="user-avatar-inner">
+                                <span class="fw-bold">{{ user.email|make_list|first|upper }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2 rounded-3">
+                        <li class="px-3 py-2 border-bottom mb-1 text-center">
+                            <div class="fw-bold text-truncate">{{ user.email }} {{ user.last_name  }}</div>
+                        </li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle fa-sm me-2 text-muted"></i> My Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog fa-sm me-2 text-muted"></i> Account Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="#" method="post" class="m-0 p-0 d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt fa-sm me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-0">
+        <div class="d-flex flex-nowrap w-100 min-vh-100">            
+            
+            <div class="d-none d-md-block sidebar-container flex-shrink-0" style="width: 280px;">
+                <div class="d-flex flex-column h-100 p-3 pt-2">              
+                    <ul class="nav flex-column gap-1">
+                        {% for item in dynamic_menu %}
+                            <li class="nav-item">
+                                <a class="nav-link-custom {% if request.path == item.url %}active{% endif %}" href="{{ item.url }}">
+                                    <i class="{{ item.icon }}"></i> {{ item.label }}
+                                    {% if item.module_code == 'store' %}
+                                        <span class="badge-premium">PRO</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <hr class="my-4 text-muted">
+                    
+                    <ul class="nav flex-column gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link-custom" href="#">
+                                <i class="bi bi-question-circle"></i> Help & Support
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="mt-auto pt-4">
+                        <div class="small text-muted px-2">
+                            <i class="bi bi-shield-check text-success"></i> Secure SaaS Environment
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="offcanvasSidebarLabel">
+                <div class="offcanvas-header border-bottom">
+                    <h5 class="offcanvas-title fw-bold" id="offcanvasSidebarLabel">
+                        <i class="bi bi-layers-fill me-2" style="color: var(--primary-color);"></i> Menu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body p-3">
+                    <ul class="nav flex-column gap-2">
+                        {% for item in dynamic_menu %}
+                            <li>
+                                <a class="nav-link-custom {% if request.path == item.url %}active{% endif %}" href="{{ item.url }}">
+                                    <i class="{{ item.icon }}"></i> {{ item.label }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="main-content-wrapper p-3 p-md-4 pt-0">
+                
+                {% block content %}
+                {% endblock %}
+                
+                <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container" style="z-index: 1100; margin-top: 60px;">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="toast align-items-center bg-white border-0 shadow-lg rounded-3 mb-3 custom-toast-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="d-flex p-2">
+                                    <div class="d-flex align-items-center justify-content-center p-2">
+                                        <i class="bi bi-info-circle-fill fs-4 text-info"></i>
+                                    </div>
+                                    <div class="d-flex flex-column justify-content-center flex-grow-1 px-2 py-1">
+                                        <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.95rem;">Notification</h6>
+                                        <span class="text-secondary small fw-medium mt-1">{{ message }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-start pt-2 pe-2">
+                                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="toast" aria-label="Close" style="font-size: 0.75rem;"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var toastEls = document.querySelectorAll('.toast');
+                        toastEls.forEach(function(toastEl) {
+                            var toast = new bootstrap.Toast(toastEl, { animation: true, autohide: true, delay: 3000 });
+                            toast.show();
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    {% block extra_scripts %}
+    <script>
+        document.querySelectorAll('.nav-link-custom[data-bs-toggle="collapse"]').forEach(link => {
+            link.addEventListener('click', function() {
+                const icon = this.querySelector('.chevron-icon');
+                if (icon) icon.classList.toggle('rotated');
+            });
+        });
+    </script>    
+    {% endblock %}
+</body>
+</html>
