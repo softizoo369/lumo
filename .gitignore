@@ -23,6 +23,7 @@ db.sqlite3
 # Env files
 .env
 .env.local
+.env.example
 
 # Django media
 media/
@@ -32,3 +33,5 @@ media/
 
 # Byte-compiled / optimized
 *.pyc
+
+
