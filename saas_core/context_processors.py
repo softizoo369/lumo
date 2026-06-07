@@ -1,4 +1,5 @@
 from .models import SaaSAppModule, TenantActiveModule, AdminNotification, SystemErrorLog
+from django.urls import reverse
 
 def tenant_global_data(request):
     """
@@ -20,15 +21,26 @@ def tenant_global_data(request):
     # Combine them
     all_modules = list(core_modules) + list(premium_modules)
 
-    # Build menu
-    dynamic_menu = [{"label": "Dashboard", "icon": "fa-solid fa-house", "url": "/dashboard/"}]
+    # Build menu (use reverse for known routes and include '/saas/' prefix)
+    try:
+        dashboard_url = reverse('tenant_dashboard')
+    except Exception:
+        dashboard_url = '/saas/dashboard/'
+
+    dynamic_menu = [{"label": "Dashboard", "icon": "fa-solid fa-house", "url": dashboard_url}]
     for mod in all_modules:
+        # per-module route may live under /saas/app/<module>/ — ensure prefix
         dynamic_menu.append({
             "label": mod.name,
             "icon": mod.icon_class,
-            "url": f"/app/{mod.module_code}/"
+            "url": f"/saas/app/{mod.module_code}/"
         })
-    dynamic_menu.append({"label": "App Store", "icon": "fa-solid fa-store", "url": "/app-store/"})
+
+    try:
+        app_store_url = reverse('app_store')
+    except Exception:
+        app_store_url = '/saas/app-store/'
+    dynamic_menu.append({"label": "App Store", "icon": "fa-solid fa-store", "url": app_store_url})
 
     # Notifications (most recent unread)
     unread_notifications = AdminNotification.objects.filter(user=request.user, is_read=False).order_by('-created_at')[:5]

@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import SaaSAppModule, TenantActiveModule, AdminNotification
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 @login_required
 def get_dynamic_sidebar_menu(request):
@@ -25,11 +26,16 @@ def get_dynamic_sidebar_menu(request):
     all_allowed_modules = list(core_modules) + list(premium_modules)
     
     # 4. Build the JSON Menu Structure
+    try:
+        dashboard_url = reverse('tenant_dashboard')
+    except Exception:
+        dashboard_url = '/saas/dashboard/'
+
     menu_data = [
         {
             "label": "Dashboard",
             "icon": "fas fa-home",
-            "url": "/dashboard/",
+            "url": dashboard_url,
             "module_code": "core"
         }
     ]
@@ -38,15 +44,20 @@ def get_dynamic_sidebar_menu(request):
         menu_data.append({
             "label": mod.name,
             "icon": mod.icon_class,
-            "url": f"/app/{mod.module_code}/", # Dynamic URL routing
+            "url": f"/saas/app/{mod.module_code}/", # Dynamic URL routing
             "module_code": mod.module_code
         })
         
     # Always show App Store at the bottom
+    try:
+        app_store_url = reverse('app_store')
+    except Exception:
+        app_store_url = '/saas/app-store/'
+
     menu_data.append({
         "label": "App Store",
         "icon": "fas fa-store",
-        "url": "/app-store/",
+        "url": app_store_url,
         "module_code": "store",
         "is_highlighted": True
     })
