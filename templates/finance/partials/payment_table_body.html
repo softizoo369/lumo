@@ -1,0 +1,22 @@
+{% for payment in page_obj %}
+<tr class="align-middle action-row">
+    <td class="ps-4 py-3">
+        <div class="fw-bold">{{ payment.transaction_reference|default:payment.id }}</div>
+        <div class="text-muted small">Invoice: <a href="{% url 'invoice_detail' payment.invoice.pk %}">{{ payment.invoice.invoice_number }}</a></div>
+    </td>
+    <td>
+        <div class="fw-semibold">{{ payment.amount|floatformat:2 }}</div>
+        <div class="text-muted small">Method: {{ payment.payment_method }}</div>
+    </td>
+    <td class="text-end">{{ payment.status }}</td>
+    <td class="text-end pe-4">{{ payment.created_at|date:"M d, Y" }}</td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="text-center py-5">
+        <i class="bi bi-credit-card fs-1 text-muted opacity-25 d-block mb-3"></i>
+        <h5 class="fw-bold text-dark">No payments found</h5>
+        <p class="text-muted small">Try adjusting your filters.</p>
+    </td>
+</tr>
+{% endfor %}

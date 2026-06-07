@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} | {{ current_workspace.company_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 mt-1 py-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-semibold mb-1 text-dark">Invoice {{ invoice.invoice_number }}</h1>
+            <div class="text-muted small">{{ invoice.client.name }} &middot; {{ invoice.date_issued|date:"M d, Y" }}</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'invoice_pdf' invoice.pk %}" class="btn btn-light">Download PDF</a>
+            <a href="#" class="btn btn-primary">Record Payment</a>
+        </div>
+    </div>
+
+    <div class="premium-card bg-white p-4 rounded-4 shadow-sm border">
+        <div class="row">
+            <div class="col-md-8">
+                <h5 class="fw-bold">Bill To</h5>
+                <div>{{ invoice.client.name }}</div>
+                <div>{{ invoice.client.company_name }}</div>
+                <div class="text-muted small">{{ invoice.client.billing_address }}</div>
+            </div>
+            <div class="col-md-4 text-end">
+                <h5 class="fw-bold">Totals</h5>
+                <div>Subtotal: {{ invoice.sub_total|floatformat:2 }}</div>
+                <div>Tax: {{ invoice.tax_amount|floatformat:2 }}</div>
+                <div>Discount: {{ invoice.discount_amount|floatformat:2 }}</div>
+                <div class="fw-bold">Grand Total: {{ invoice.grand_total|floatformat:2 }}</div>
+                <div class="text-success">Paid: {{ invoice.paid_amount|floatformat:2 }}</div>
+                <div class="text-danger">Balance: {{ invoice.balance|floatformat:2 }}</div>
+            </div>
+        </div>
+
+        <hr class="my-3">
+        <h6 class="fw-semibold">Items</h6>
+        <ul class="list-group list-group-flush">
+            {% for item in invoice.items.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-bold">{{ item.description }}</div>
+                    <div class="text-muted small">{{ item.quantity }} × {{ item.unit_price|floatformat:2 }}</div>
+                </div>
+                <div class="fw-semibold">{{ item.total|floatformat:2 }}</div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
